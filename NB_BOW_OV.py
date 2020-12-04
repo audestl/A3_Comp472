@@ -58,12 +58,12 @@ for item in vocabulary:
 # print(t)
 
 # COMPUTE CONDITIONALS
-# Vocabulary = all words in the tweets of the training dataset
+# Vocabulary = all words in the tweets of the training set
 
 # Step 1: Split the tweets based on yes or no
 
-numNo = 0
-numYes = 0
+numTweetsNo = 0
+numTweetsYes = 0
 yesTweets = []
 noTweets = []
 finalYesTweets = []
@@ -71,10 +71,10 @@ finalNoTweets = []
 
 for i in range(numrows):
     if arr[i][2] == "no":
-        numNo += 1
+        numTweetsNo += 1
         noTweets.append(arr[i][1])
     if arr[i][2] == "yes":
-        numYes += 1
+        numTweetsYes += 1
         yesTweets.append(arr[i][1])
 
 # Step 2 : Count each instances of every word from the vocabulary in YesTweets
@@ -111,23 +111,29 @@ for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-
 # Initialize "no" tweets dictionary with training set
 for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-
 # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
-probYes = numYes / (numYes + numNo)
-probNo = numNo / (numYes + numNo)
+totalTweets = numTweetsNo + numTweetsYes
+priorYes = numTweetsYes / totalTweets
+priorNo = numTweetsNo / totalTweets
 
 # Apply the model on the test set
-def computeResult():
-    # Score(No) = Prior(No) x P(word1 | No) X (word2 | No) ... P (wordX | No)
-    # Score(Yes) = Prior(Yes) x P(word1 | Yes) X (word2 | Yes) ... P (wordX | Yes)
-    # return argmax (Score(yes), Score(no))
 
+tsv_file = open("covid_test_public.tsv")
+read_tsv = csv.reader(tsv_file, delimiter="\t")
+testArr = []
+for row in read_tsv:
+    testArr.append(row)
 
-
+# Step 1 : Parse the tweet to have every word in a list.
+# Step 2 : Get rid of words that are not in the finalDictionary
+# Step 3 : For every words left, go find it's conditional probability for yesDictionary and NoDictionary
+# def computeResult():
+# scoreNo = log(priorNo) x log(P(word1 | No)) X log(P(word2 | No)) ... log(P(wordX | No))
+# scoreYes = log(priorYes) x log(P(word1 | Yes)) X log((word2 | Yes)) ... log(P(wordX | Yes))
+# return argmax (Score(yes), Score(no))
