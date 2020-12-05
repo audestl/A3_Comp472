@@ -1,12 +1,7 @@
 import csv
 from itertools import chain
-
-import nltk
-import numpy as np
-import matplotlib.pyplot as plt
-from nltk.tokenize import word_tokenize
+import math
 from nltk.tokenize import RegexpTokenizer
-import re
 
 tsv_file = open("covid_training.tsv")
 read_tsv = csv.reader(tsv_file, delimiter="\t")
@@ -130,9 +125,52 @@ testArr = []
 for row in read_tsv:
     testArr.append(row)
 
+testTweets = []
+for i in range(len(testArr)):
+    tokenizer = RegexpTokenizer(r'\w+')
+    s = tokenizer.tokenize(testArr[i][1])
+    testTweets.append(s)
+
+
+# testTweets = list(chain.from_iterable(testTweets))
+
+# For every word in testTweets, find it in yesDictionary
+#   if not there, go to next one
+#   else : pass it to condYes()
+def condYes(freq):
+    prob = math.log10((freq + 0.01) / (totalWordsYes + len(finalVocabulary)))
+    return prob
+
+
+def condNo(freq):
+    prob = math.log10((freq + 0.01) / (totalWordsNo + len(finalVocabulary)))
+    return prob
+
+
+print(testTweets)
+totalYesConditionals = 1  # can't be 0 to start
+for item in testTweets[0]:
+    if item in yesDictionary:
+        totalYesConditionals *= condYes(yesDictionary[item])
+
+totalYesConditionals *= math.log10(priorYes)
+print("Score Yes : " + str(totalYesConditionals))
+
+# Total No conditionals
+totalNoConditionals = 1  # can't be 0 to start
+for item in testTweets[0]:
+    if item in noDictionary:
+        totalYesConditionals *= condNo(noDictionary[item])
+
+totalNoConditionals *= math.log10(priorNo)
+print("Score No : " + str(totalNoConditionals))
+
 # Step 1 : Parse the tweet to have every word in a list.
 # Step 2 : Get rid of words that are not in the finalDictionary
 # Step 3 : For every words left, go find it's conditional probability for yesDictionary and NoDictionary
+
+# P(word|class) = frequency of word in class x * 0.01 / number of words in class x + total number of words in dictionary
+
 # def computeResult():
 # scoreNo = log(priorNo) x log(P(word1 | No)) X log(P(word2 | No)) ... log(P(wordX | No))
 # scoreYes = log(priorYes) x log(P(word1 | Yes)) X log((word2 | Yes)) ... log(P(wordX | Yes))
