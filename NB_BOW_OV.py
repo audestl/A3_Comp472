@@ -35,8 +35,6 @@ for i in range(numrows):
     for y in range(singleSize):
         vocabulary.append(vocabularyArr[i][y])
 
-# vocabulary.remove(vocabulary[0])
-# vocabulary = list(chain.from_iterable(vocabulary))
 
 # To remove duplicates from the vocabulary
 vocabulary = list(set(vocabulary))
@@ -47,10 +45,6 @@ for item in vocabulary:
         seen.add(item)
         finalVocabulary.append(item)
 
-# ANOTHER WAY TO CLEAN THE DATA
-# s = arr[7][1]
-# t = re.findall(r'\S+', s)
-# print(t)
 
 # COMPUTE CONDITIONALS
 # Vocabulary = all words in the tweets of the training set
@@ -106,10 +100,6 @@ for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-# Initialize "no" tweets dictionary with training set
-for i in range(len(finalVocabulary)):
-    val = finalNoTweets.count(finalVocabulary[i])
-    noDictionary[finalVocabulary[i]] = val
 
 # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
@@ -125,6 +115,7 @@ testArr = []
 for row in read_tsv:
     testArr.append(row)
 
+
 testTweets = []
 for i in range(len(testArr)):
     tokenizer = RegexpTokenizer(r'\w+')
@@ -132,46 +123,42 @@ for i in range(len(testArr)):
     testTweets.append(s)
 
 
-# testTweets = list(chain.from_iterable(testTweets))
-
-# For every word in testTweets, find it in yesDictionary
-#   if not there, go to next one
-#   else : pass it to condYes()
-def condYes(freq):
+def calculateCondYes(freq):
     prob = math.log10((freq + 0.01) / (totalWordsYes + len(finalVocabulary)))
     return prob
 
 
-def condNo(freq):
+def calculateCondNo(freq):
     prob = math.log10((freq + 0.01) / (totalWordsNo + len(finalVocabulary)))
     return prob
 
-
-print(testTweets)
-totalYesConditionals = 1  # can't be 0 to start
-for item in testTweets[0]:
+# Total Yes conditionals
+scoreYes = 1  # can't be 0 to start
+for item in testTweets[2]:
     if item in yesDictionary:
-        totalYesConditionals *= condYes(yesDictionary[item])
+        scoreYes *= calculateCondYes(yesDictionary[item])
 
-totalYesConditionals *= math.log10(priorYes)
-print("Score Yes : " + str(totalYesConditionals))
+scoreYes *= math.log10(priorYes)
+print("Score Yes : " + str(scoreYes))
 
 # Total No conditionals
-totalNoConditionals = 1  # can't be 0 to start
-for item in testTweets[0]:
+scoreNo = 1  # can't be 0 to start
+for item in testTweets[2]:
     if item in noDictionary:
-        totalYesConditionals *= condNo(noDictionary[item])
+        scoreNo *= calculateCondNo(noDictionary[item])
 
-totalNoConditionals *= math.log10(priorNo)
-print("Score No : " + str(totalNoConditionals))
+scoreNo *= math.log10(priorNo)
+print("Score No : " + str(scoreNo))
 
-# Step 1 : Parse the tweet to have every word in a list.
-# Step 2 : Get rid of words that are not in the finalDictionary
-# Step 3 : For every words left, go find it's conditional probability for yesDictionary and NoDictionary
+# Writing to the Trace file
+f= open("trace_NB-BOW-OV.txt","w+")
+for i in range(len(testArr)):
+     f.write(testArr[i][0]+"  yes/no  classScore  "+testArr[i][2]+"  correct\n")
 
-# P(word|class) = frequency of word in class x * 0.01 / number of words in class x + total number of words in dictionary
+# Writing to the Evaluation file
+f= open("eval_NB-BOW-OV.txt","w+")
+f.write("Accuracy\n"+"yes-Precision  no-Precision\n"+"yes-recall  no-recall\n"+"yes-F1  no-F1")
 
-# def computeResult():
-# scoreNo = log(priorNo) x log(P(word1 | No)) X log(P(word2 | No)) ... log(P(wordX | No))
-# scoreYes = log(priorYes) x log(P(word1 | Yes)) X log((word2 | Yes)) ... log(P(wordX | Yes))
-# return argmax (Score(yes), Score(no))
+f.close()
+
+
