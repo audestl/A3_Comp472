@@ -64,6 +64,7 @@ for i in range(numrows):
         numTweetsYes += 1
         yesTweets.append(arr[i][1])
 
+
 # Step 2 : Count each instances of every word from the vocabulary in YesTweets
 sizeYes = len(yesTweets)
 
@@ -82,6 +83,7 @@ for i in range(sizeNo):
     finalNoTweets.append(s)
 finalNoTweets = list(chain.from_iterable(finalNoTweets))
 
+
 # Count number of words in each dictionary
 totalWordsNo = len(finalNoTweets)
 totalWordsYes = len(finalYesTweets)
@@ -97,6 +99,16 @@ for i in range(len(finalVocabulary)):
 for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
+
+# total = 0
+# for item in yesDictionary:
+#     total += yesDictionary[item]
+# print(total)
+#
+# total1 = 0
+# for item in noDictionary:
+#     total1 += noDictionary[item]
+# print(total1)
 
 # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
@@ -120,12 +132,12 @@ for i in range(len(testArr)):
 
 
 def calculateCondYes(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsYes + len(finalVocabulary)))
+    prob = math.log10((freq + 0.01) / (totalWordsYes + (len(finalVocabulary) * 0.01)))
     return prob
 
 
 def calculateCondNo(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsNo + len(finalVocabulary)))
+    prob = math.log10((freq + 0.01) / (totalWordsNo + (len(finalVocabulary) * 0.01)))
     return prob
 
 
@@ -136,20 +148,18 @@ modelPrediction = ""
 f = open("trace_NB-BOW-OV.txt", "w+")
 for i in range(len(testTweets)):
     # Total Yes conditionals
-    scoreYes = 1  # can't be 0 to start
+    scoreYes = 0  # can't be 0 to start
+    scoreYes += math.log10(priorYes)
     for item in testTweets[i]:
         if item in yesDictionary:
-            scoreYes *= calculateCondYes(yesDictionary[item])
-
-    scoreYes *= math.log10(priorYes)
+            scoreYes += calculateCondYes(yesDictionary[item])
 
     # Total No conditionals
-    scoreNo = 1  # can't be 0 to start
+    scoreNo = 0  # can't be 0 to start
+    scoreNo += math.log10(priorNo)
     for item in testTweets[i]:
         if item in noDictionary:
-            scoreNo *= calculateCondNo(noDictionary[item])
-
-    scoreNo *= math.log10(priorNo)
+            scoreNo += calculateCondNo(noDictionary[item])
 
     if scoreNo > scoreYes:
         modelPrediction = "no"
@@ -169,12 +179,12 @@ for i in range(len(testTweets)):
 
 def calculateAccuracy():
     #     # % of instances of the test set the algorithm correctly
-    return numCorrect / numCorrect + numWrong
+    return numCorrect / (numCorrect + numWrong)
 
 
 print("Accuracy : " + str(calculateAccuracy()))
 #
-# # TP = nb of instances that are in class C and that the model identified as
+# # TP = nb of instances that are in class C and that the model identified as C
 # # FP = nb of instances that the model labelled as class C
 # # FN = All instances that are in class C
 # def calculateRecall():
@@ -188,6 +198,6 @@ print("Accuracy : " + str(calculateAccuracy()))
 
 
 f = open("eval_NB-BOW-OV.txt", "w+")
-f.write(str(calculateAccuracy())+"\n" + "yes-Precision  no-Precision\n" + "yes-recall  no-recall\n" + "yes-F1  no-F1")
+f.write(str(calculateAccuracy()) + "\n" + "yes-Precision  no-Precision\n" + "yes-recall  no-recall\n" + "yes-F1  no-F1")
 
 f.close()
