@@ -1,4 +1,4 @@
-Accuracy
+35.0
 yes-Precision  no-Precision
 yes-recall  no-recall
 yes-F1  no-F1

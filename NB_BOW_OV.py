@@ -35,7 +35,6 @@ for i in range(numrows):
     for y in range(singleSize):
         vocabulary.append(vocabularyArr[i][y])
 
-
 # To remove duplicates from the vocabulary
 vocabulary = list(set(vocabulary))
 seen = set()
@@ -44,7 +43,6 @@ for item in vocabulary:
     if item not in seen:
         seen.add(item)
         finalVocabulary.append(item)
-
 
 # COMPUTE CONDITIONALS
 # Vocabulary = all words in the tweets of the training set
@@ -100,7 +98,6 @@ for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-
 # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
 totalTweets = numTweetsNo + numTweetsYes
@@ -114,7 +111,6 @@ read_tsv = csv.reader(tsv_file, delimiter="\t")
 testArr = []
 for row in read_tsv:
     testArr.append(row)
-
 
 testTweets = []
 for i in range(len(testArr)):
@@ -132,33 +128,66 @@ def calculateCondNo(freq):
     prob = math.log10((freq + 0.01) / (totalWordsNo + len(finalVocabulary)))
     return prob
 
-# Total Yes conditionals
-scoreYes = 1  # can't be 0 to start
-for item in testTweets[2]:
-    if item in yesDictionary:
-        scoreYes *= calculateCondYes(yesDictionary[item])
 
-scoreYes *= math.log10(priorYes)
-print("Score Yes : " + str(scoreYes))
+numCorrect = 0
+numWrong = 0
+conclusion = ""
+modelPrediction = ""
+f = open("trace_NB-BOW-OV.txt", "w+")
+for i in range(len(testTweets)):
+    # Total Yes conditionals
+    scoreYes = 1  # can't be 0 to start
+    for item in testTweets[i]:
+        if item in yesDictionary:
+            scoreYes *= calculateCondYes(yesDictionary[item])
 
-# Total No conditionals
-scoreNo = 1  # can't be 0 to start
-for item in testTweets[2]:
-    if item in noDictionary:
-        scoreNo *= calculateCondNo(noDictionary[item])
+    scoreYes *= math.log10(priorYes)
 
-scoreNo *= math.log10(priorNo)
-print("Score No : " + str(scoreNo))
+    # Total No conditionals
+    scoreNo = 1  # can't be 0 to start
+    for item in testTweets[i]:
+        if item in noDictionary:
+            scoreNo *= calculateCondNo(noDictionary[item])
 
-# Writing to the Trace file
-f= open("trace_NB-BOW-OV.txt","w+")
-for i in range(len(testArr)):
-     f.write(testArr[i][0]+"  yes/no  classScore  "+testArr[i][2]+"  correct\n")
+    scoreNo *= math.log10(priorNo)
 
-# Writing to the Evaluation file
-f= open("eval_NB-BOW-OV.txt","w+")
-f.write("Accuracy\n"+"yes-Precision  no-Precision\n"+"yes-recall  no-recall\n"+"yes-F1  no-F1")
+    if scoreNo > scoreYes:
+        modelPrediction = "no"
+    else:
+        modelPrediction = "yes"
+
+    if (testArr[i][2] == "no" and modelPrediction == "yes") or (testArr[i][2] == "yes" and modelPrediction == "no"):
+        conclusion = "wrong"
+        numWrong += 1
+    else:
+        conclusion = "correct"
+        numCorrect += 1
+
+    f.write(str(testArr[i][0]) + "  " + str(modelPrediction) + "  " + str(scoreNo) + "  " + str(testArr[i][2]) + "  " +
+            str(conclusion) + "\n")
+
+
+def calculateAccuracy():
+    #     # % of instances of the test set the algorithm correctly
+    return numCorrect / numCorrect + numWrong
+
+
+print("Accuracy : " + str(calculateAccuracy()))
+#
+# # TP = nb of instances that are in class C and that the model identified as
+# # FP = nb of instances that the model labelled as class C
+# # FN = All instances that are in class C
+# def calculateRecall():
+#     # TP / TP + FP
+#
+# def calculatePrecision():
+#     # TP / TP + FN
+#
+# def calculateF1():
+# 2PR/(P+R)
+
+
+f = open("eval_NB-BOW-OV.txt", "w+")
+f.write(str(calculateAccuracy())+"\n" + "yes-Precision  no-Precision\n" + "yes-recall  no-recall\n" + "yes-F1  no-F1")
 
 f.close()
-
-
