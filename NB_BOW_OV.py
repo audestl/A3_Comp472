@@ -3,7 +3,7 @@ from itertools import chain
 import math
 from nltk.tokenize import RegexpTokenizer
 
-tsv_file = open("covid_training.tsv")
+tsv_file = open("covid_training.tsv", encoding="UTF-8")
 read_tsv = csv.reader(tsv_file, delimiter="\t")
 arr = []
 
@@ -64,7 +64,6 @@ for i in range(numrows):
         numTweetsYes += 1
         yesTweets.append(arr[i][1])
 
-
 # Step 2 : Count each instances of every word from the vocabulary in YesTweets
 sizeYes = len(yesTweets)
 
@@ -82,7 +81,6 @@ for i in range(sizeNo):
     s = tokenizer.tokenize(noTweets[i])
     finalNoTweets.append(s)
 finalNoTweets = list(chain.from_iterable(finalNoTweets))
-
 
 # Count number of words in each dictionary
 totalWordsNo = len(finalNoTweets)
@@ -143,6 +141,10 @@ def calculateCondNo(freq):
 
 numCorrect = 0
 numWrong = 0
+fpYes = 0
+fpNo = 0
+fnYes = 0
+fnNo = 0
 conclusion = ""
 modelPrediction = ""
 f = open("trace_NB-BOW-OV.txt", "w+")
@@ -168,14 +170,22 @@ for i in range(len(testTweets)):
         modelPrediction = "yes"
         finalScore = scoreYes
 
-    if (testArr[i][2] == "no" and modelPrediction == "yes") or (testArr[i][2] == "yes" and modelPrediction == "no"):
+    if testArr[i][2] == "no" and modelPrediction == "yes":
         conclusion = "wrong"
+        fpYes += 1
+        fnNo += 1
+        numWrong += 1
+    elif testArr[i][2] == "yes" and modelPrediction == "no":
+        conclusion = "wrong"
+        fpNo += 1
+        fnYes += 1
         numWrong += 1
     else:
         conclusion = "correct"
         numCorrect += 1
 
-    f.write(str(testArr[i][0]) + "  " + str(modelPrediction) + "  " + str("{:e}".format(finalScore)) + "  " + str(testArr[i][2]) + "  " +
+    f.write(str(testArr[i][0]) + "  " + str(modelPrediction) + "  " + str("{:e}".format(finalScore)) + "  " + str(
+        testArr[i][2]) + "  " +
             str(conclusion) + "\n")
 
 
@@ -185,30 +195,41 @@ def calculateAccuracy():
 
 
 print("Accuracy : " + str(calculateAccuracy()))
+
+
 #
-# # TP = nb of instances that are in class C and that the model identified as C
-# # FP = nb of instances that the model labelled as class C
-# # FN = All instances that are in class C
-# def calculateRecallYes():
-#     # TP / TP + FP
-
-# def calculateRecallNo():
-#     # TP / TP + FP
-
-# def calculatePrecisionYes():
-#     # TP / TP + FN
-
-# def calculatePrecisionNo():
-#     # TP / TP + FN
-
-# def calculateF1Yes():
-# 2PR/(P+R)
-
-# def calculateF1No():
-# 2PR/(P+R)
+# TP = nb of instances that are in class C and that the model identified as C
+# FP = nb of instances that the model labelled as class C
+# FN = All instances that are in class C
+def calculateRecallYes():
+    return numCorrect / (numCorrect + fpNo)
 
 
-f = open("eval_NB-BOW-OV.txt", "w+")
-f.write(str(calculateAccuracy()) + "\n" + "yes-Precision  no-Precision\n" + "yes-recall  no-recall\n" + "yes-F1  no-F1")
+def calculateRecallNo():
+    return numCorrect / (numCorrect + fpNo)
+
+
+def calculatePrecisionYes():
+    return numCorrect / (numCorrect + fnYes)
+
+
+def calculatePrecisionNo():
+    return numCorrect / (numCorrect + fnNo)
+
+
+def calculateF1Yes():
+    return (2 * calculatePrecisionYes() * calculateRecallYes()) / (calculatePrecisionYes() + calculateRecallYes())
+
+
+def calculateF1No():
+    return (2 * calculatePrecisionNo() * calculateRecallNo()) / (calculatePrecisionNo() + calculateRecallNo())
+
+
+
+f = open("eval_NB-BOW-OV.txt", "w+", encoding="UTF-8")
+f.write(str(calculateAccuracy()) + "\n" + str(calculatePrecisionYes())
+        + "  " + str(calculatePrecisionNo()) + "\n" + str(calculateRecallYes())
+        + "  " + str(calculateRecallNo()) + "\n" + str(calculateF1Yes()) + "  " + str(calculateF1No()) + "\n")
+
 
 f.close()
