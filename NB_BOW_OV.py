@@ -163,8 +163,10 @@ for i in range(len(testTweets)):
 
     if scoreNo > scoreYes:
         modelPrediction = "no"
+        finalScore = scoreNo
     else:
         modelPrediction = "yes"
+        finalScore = scoreYes
 
     if (testArr[i][2] == "no" and modelPrediction == "yes") or (testArr[i][2] == "yes" and modelPrediction == "no"):
         conclusion = "wrong"
@@ -173,7 +175,7 @@ for i in range(len(testTweets)):
         conclusion = "correct"
         numCorrect += 1
 
-    f.write(str(testArr[i][0]) + "  " + str(modelPrediction) + "  " + str(scoreNo) + "  " + str(testArr[i][2]) + "  " +
+    f.write(str(testArr[i][0]) + "  " + str(modelPrediction) + "  " + str("{:e}".format(finalScore)) + "  " + str(testArr[i][2]) + "  " +
             str(conclusion) + "\n")
 
 
@@ -187,13 +189,22 @@ print("Accuracy : " + str(calculateAccuracy()))
 # # TP = nb of instances that are in class C and that the model identified as C
 # # FP = nb of instances that the model labelled as class C
 # # FN = All instances that are in class C
-# def calculateRecall():
+# def calculateRecallYes():
 #     # TP / TP + FP
-#
-# def calculatePrecision():
+
+# def calculateRecallNo():
+#     # TP / TP + FP
+
+# def calculatePrecisionYes():
 #     # TP / TP + FN
-#
-# def calculateF1():
+
+# def calculatePrecisionNo():
+#     # TP / TP + FN
+
+# def calculateF1Yes():
+# 2PR/(P+R)
+
+# def calculateF1No():
 # 2PR/(P+R)
 
 
