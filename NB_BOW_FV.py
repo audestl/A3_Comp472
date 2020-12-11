@@ -151,7 +151,7 @@ numCorrect = 0
 numWrong = 0
 conclusion = ""
 modelPrediction = ""
-f = open("trace_NB-BOW-OV.txt", "w+")
+f = open("trace_NB-BOW-FV.txt", "w+")
 for i in range(len(testTweets)):
     # Total Yes conditionals
     scoreYes = 0  # can't be 0 to start
@@ -203,7 +203,7 @@ print("Accuracy : " + str(calculateAccuracy()))
 # 2PR/(P+R)
 
 
-f = open("eval_NB-BOW-OV.txt", "w+")
+f = open("eval_NB-BOW-FV.txt", "w+")
 f.write(str(calculateAccuracy()) + "\n" + "yes-Precision  no-Precision\n" + "yes-recall  no-recall\n" + "yes-F1  no-F1")
 
 f.close()
