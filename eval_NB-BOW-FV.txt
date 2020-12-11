@@ -1,4 +1,4 @@
-0.7454545454545455
+0.6909090909090909
 yes-Precision  no-Precision
 yes-recall  no-recall
 yes-F1  no-F1

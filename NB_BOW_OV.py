@@ -98,10 +98,7 @@ for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-# total = 0
-# for item in yesDictionary:
-#     total += yesDictionary[item]
-# print(total)
+
 #
 # total1 = 0
 # for item in noDictionary:

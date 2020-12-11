@@ -83,9 +83,8 @@ for i in range(sizeNo):
     finalNoTweets.append(s)
 finalNoTweets = list(chain.from_iterable(finalNoTweets))
 
-# Count number of words in each dictionary
-totalWordsNo = len(finalNoTweets)
-totalWordsYes = len(finalYesTweets)
+
+
 
 
 
@@ -103,18 +102,10 @@ for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
 
-filteredYesDictionary = {key:val for key, val in yesDictionary.items() if val != 1}
-filteredNoDictionary = {key:val for key, val in noDictionary.items() if val != 1}
 
-# total = 0
-# for item in filteredYesDictionary:
-#     total += filteredYesDictionary[item]
-# print(total)
-#
-# total1 = 0
-# for item in filteredNoDictionary:
-#     total1 += filteredNoDictionary[item]
-# print(total1)
+yesDictionary = {key:val for key, val in yesDictionary.items() if val != 1}
+noDictionary = {key:val for key, val in noDictionary.items() if val != 1}
+
 
 # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
@@ -138,12 +129,12 @@ for i in range(len(testArr)):
 
 
 def calculateCondYes(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsYes + (len(finalVocabulary) * 0.01)))
+    prob = math.log10((freq + 0.01) / (sum(yesDictionary.values()) + (len(finalVocabulary) * 0.01)))
     return prob
 
 
 def calculateCondNo(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsNo + (len(finalVocabulary) * 0.01)))
+    prob = math.log10((freq + 0.01) / (sum(noDictionary.values()) + (len(finalVocabulary) * 0.01)))
     return prob
 
 
