@@ -15,9 +15,11 @@ yesDictionary = defaultdict(int)
 noDictionary = defaultdict(int)
 
 for tweet in Tweets:
+    # treatment of the tweet to lowercase and remove id and useless classes
     tweet = tweet.lower()
     tempArray = tweet.split()
     tempArray = tempArray[1:-6]
+    # Check classification of the tweet and add it to the correct list
     if tempArray[len(tempArray) - 1] == "yes":
         tempArray.pop(len(tempArray) - 1)
         yesTweets.append(" ".join(tempArray))
@@ -27,6 +29,7 @@ for tweet in Tweets:
     for elem in tempArray:
         vocabDictionary[elem] += 1
 
+#Create dictionaries of word occurences in the tweet lists
 for item in yesTweets:
     for word in item.split():
         yesDictionary[word] += 1
@@ -36,7 +39,6 @@ for item in noTweets:
         noDictionary[word] += 1
 
 #Filter the dictionaries
-
 vocabDictionary = {key: val for key, val in vocabDictionary.items() if val != 1}
 yesDictionary = {key: val for key, val in yesDictionary.items() if val != 1}
 noDictionary = {key: val for key, val in noDictionary.items() if val != 1}
@@ -48,7 +50,6 @@ priorYes = len(yesTweets) / totalTweets
 priorNo = len(noTweets) / totalTweets
 
 # Apply the model on the test set
-
 tsv_file = open("covid_test_public.tsv", 'r', encoding="utf-8")
 Tweets2 = tsv_file.readlines()
 testTweets = []
@@ -116,20 +117,18 @@ for i in range(len(testTweets)):
         conclusion = "correct"
         numCorrect += 1
 
+    # output to trace file
     f.write(id + "  " + str(modelPrediction) + "  " + str("{:e}".format(finalScore)) + "  "
            + classification + "  " +str(conclusion) + "\n")
 
 
 def calculateAccuracy():
-    #     # % of instances of the test set the algorithm correctly
+    # % of instances of the test set the algorithm correctly
     return numCorrect / (numCorrect + numWrong)
 
 
 print("Accuracy : " + str(calculateAccuracy()))
 
-# TP = nb of instances that are in class C and that the model identified as C
-# FP = nb of instances that the model labelled as class C
-# FN = All instances that are in class C
 def calculateRecallYes():
     return numCorrect / (numCorrect + fpNo)
 
@@ -153,7 +152,7 @@ def calculateF1Yes():
 def calculateF1No():
     return (2 * calculatePrecisionNo() * calculateRecallNo()) / (calculatePrecisionNo() + calculateRecallNo())
 
-
+#output to eval file
 f = open("eval_NB-BOW-FV.txt", "w+", encoding="UTF-8")
 f.write(str(calculateAccuracy()) + "\n" + str(calculatePrecisionYes())
         + "  " + str(calculatePrecisionNo()) + "\n" + str(calculateRecallYes())
