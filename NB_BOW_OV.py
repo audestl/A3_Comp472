@@ -26,29 +26,27 @@ vocabulary = []
 #
 #
 for i in range(numrows):
-    tokenizer = RegexpTokenizer(r'\w+')
-    s = tokenizer.tokenize(arr[i][1])
-    vocabularyArr.append(s)
+    for y in range(numcols):
+        s = arr[i][1].split()
+        vocabularyArr.append(s)
 
-for i in range(numrows):
-    singleSize = len(vocabularyArr[i])
-    for y in range(singleSize):
-        vocabulary.append(vocabularyArr[i][y])
+vocabularyArr = list(chain.from_iterable(vocabularyArr))
 
 # To remove duplicates from the vocabulary
-vocabulary = list(set(vocabulary))
+vocabularyArr = list(set(vocabularyArr))
 seen = set()
 finalVocabulary = []
-for item in vocabulary:
+for item in vocabularyArr:
     if item not in seen:
         seen.add(item)
         finalVocabulary.append(item)
-
-# COMPUTE CONDITIONALS
-# Vocabulary = all words in the tweets of the training set
-
-# Step 1: Split the tweets based on yes or no
-
+print(finalVocabulary)
+#
+# # COMPUTE CONDITIONALS
+# # Vocabulary = all words in the tweets of the training set
+#
+# # Step 1: Split the tweets based on yes or no
+#
 numTweetsNo = 0
 numTweetsYes = 0
 yesTweets = []
@@ -63,55 +61,47 @@ for i in range(numrows):
     if arr[i][2] == "yes":
         numTweetsYes += 1
         yesTweets.append(arr[i][1])
-
-# Step 2 : Count each instances of every word from the vocabulary in YesTweets
+#
+# # Step 2 : Count each instances of every word from the vocabulary in YesTweets
 sizeYes = len(yesTweets)
-
+#
 for i in range(sizeYes):
-    tokenizer = RegexpTokenizer(r'\w+')
-    s = tokenizer.tokenize(yesTweets[i])
+    s = yesTweets[i].split()
     finalYesTweets.append(s)
 finalYesTweets = list(chain.from_iterable(finalYesTweets))
-
-# Step 3 : Count each instances of every word from the vocabulary in NoTweets
-
+#
+# # Step 3 : Count each instances of every word from the vocabulary in NoTweets
 sizeNo = len(noTweets)
 for i in range(sizeNo):
-    tokenizer = RegexpTokenizer(r'\w+')
-    s = tokenizer.tokenize(noTweets[i])
+    s = noTweets[i].split()
     finalNoTweets.append(s)
 finalNoTweets = list(chain.from_iterable(finalNoTweets))
-
-# Count number of words in each dictionary
+#
+# # Count number of words in each dictionary
 totalWordsNo = len(finalNoTweets)
 totalWordsYes = len(finalYesTweets)
-
+#
 yesDictionary = dict()
 noDictionary = dict()
-# Initialize "yes" tweets dictionary with training set
+# # Initialize "yes" tweets dictionary with training set
 for i in range(len(finalVocabulary)):
     val = finalYesTweets.count(finalVocabulary[i])
     yesDictionary[finalVocabulary[i]] = val
-
-# Initialize "No" tweets dictionary with training set
+#
+# # Initialize "No" tweets dictionary with training set
 for i in range(len(finalVocabulary)):
     val = finalNoTweets.count(finalVocabulary[i])
     noDictionary[finalVocabulary[i]] = val
-
-
 #
-# total1 = 0
-# for item in noDictionary:
-#     total1 += noDictionary[item]
-# print(total1)
-
-# COMPUTE PRIORS
+#
+#
+# # COMPUTE PRIORS
 # Calculate probabilities of each class (yes, no for factual tweet)
 totalTweets = numTweetsNo + numTweetsYes
 priorYes = numTweetsYes / totalTweets
 priorNo = numTweetsNo / totalTweets
-
-# Apply the model on the test set
+#
+# # Apply the model on the test set
 
 tsv_file = open("covid_test_public.tsv")
 read_tsv = csv.reader(tsv_file, delimiter="\t")
@@ -121,18 +111,18 @@ for row in read_tsv:
 
 testTweets = []
 for i in range(len(testArr)):
-    tokenizer = RegexpTokenizer(r'\w+')
-    s = tokenizer.tokenize(testArr[i][1])
+    s = testArr[i][1].split()
     testTweets.append(s)
 
 
+
 def calculateCondYes(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsYes + (len(finalVocabulary) * 0.01)))
+    prob = math.log10((freq + 0.01) / (sum(yesDictionary.values()) + (len(finalVocabulary) * 0.01)))
     return prob
 
 
 def calculateCondNo(freq):
-    prob = math.log10((freq + 0.01) / (totalWordsNo + (len(finalVocabulary) * 0.01)))
+    prob = math.log10((freq + 0.01) / (sum(noDictionary.values()) + (len(finalVocabulary) * 0.01)))
     return prob
 
 
