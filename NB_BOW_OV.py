@@ -79,8 +79,7 @@ for item in testTweets:
     # Total Conditionals
     scoreYes = math.log10(priorYes)
     scoreNo = math.log10(priorNo)
-    for word in item.split():
-        print(word)
+    for word in item.split()[:-1]:
         if word in vocabDictionary:
             if word in yesDictionary:
                 scoreYes += calculateCondYes(yesDictionary[word])
