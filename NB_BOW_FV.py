@@ -79,20 +79,23 @@ fnNo = 0
 conclusion = ""
 modelPrediction = ""
 f = open("trace_NB-BOW-FV.txt", "w+")
-for i in range(len(testTweets)):
+for item in testTweets:
     # Total Conditionals
+    print(item)
     scoreYes = math.log10(priorYes)
     scoreNo = math.log10(priorNo)
-    for item in testTweets[i]:
-       if item in vocabDictionary:
-            if item in yesDictionary:
-                scoreYes += calculateCondYes(yesDictionary[item])
+    for word in item.split():
+        print(word)
+        if word in vocabDictionary:
+            if word in yesDictionary:
+                scoreYes += calculateCondYes(yesDictionary[word])
             else:
                 scoreYes += calculateCondYes(0)
-            if item in noDictionary:
-                scoreNo += calculateCondNo(noDictionary[item])
+            if word in noDictionary:
+                scoreNo += calculateCondNo(noDictionary[word])
             else:
                 scoreNo += calculateCondNo(0)
+
 
     if scoreNo > scoreYes:
         modelPrediction = "no"
@@ -101,7 +104,7 @@ for i in range(len(testTweets)):
         modelPrediction = "yes"
         finalScore = scoreYes
 
-    id, *tweet, classification = testTweets[i].split()
+    id, *tweet, classification = item.split()
 
     if classification == "no" and modelPrediction == "yes":
         conclusion = "wrong"

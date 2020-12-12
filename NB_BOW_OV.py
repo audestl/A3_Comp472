@@ -3,7 +3,7 @@ from itertools import chain
 import math
 from collections import defaultdict
 
-file1 = open("covid_training.tsv", 'r', encoding="utf-8")
+file1 = open("covid_training.tsv", 'r', encoding="UTF-8")
 Tweets = file1.readlines()
 
 vocabDictionary = defaultdict(int)
@@ -45,7 +45,7 @@ priorYes = len(yesTweets) / totalTweets
 priorNo = len(noTweets) / totalTweets
 
 # Apply the model on the test set
-tsv_file = open("covid_test_public.tsv", 'r', encoding="utf-8")
+tsv_file = open("covid_test_public.tsv", 'r', encoding="UTF-8")
 Tweets2 = tsv_file.readlines()
 testTweets = []
 
@@ -58,11 +58,12 @@ for tweet in Tweets2:
 
 def calculateCondYes(freq):
     prob = math.log10((freq + 0.01) / (sum(yesDictionary.values()) + (len(vocabDictionary) * 0.01)))
+    #print(prob)
     return prob
-
 
 def calculateCondNo(freq):
     prob = math.log10((freq + 0.01) / (sum(noDictionary.values()) + (len(vocabDictionary) * 0.01)))
+    #print(prob)
     return prob
 
 numCorrect = 0
@@ -74,20 +75,23 @@ fnNo = 0
 conclusion = ""
 modelPrediction = ""
 f = open("trace_NB-BOW-OV.txt", "w+")
-for i in range(len(testTweets)):
+for item in testTweets:
     # Total Conditionals
     scoreYes = math.log10(priorYes)
     scoreNo = math.log10(priorNo)
-    for item in testTweets[i]:
-       if item in vocabDictionary:
-            if item in yesDictionary:
-                scoreYes += calculateCondYes(yesDictionary[item])
+    for word in item.split():
+        print(word)
+        if word in vocabDictionary:
+            if word in yesDictionary:
+                scoreYes += calculateCondYes(yesDictionary[word])
             else:
                 scoreYes += calculateCondYes(0)
-            if item in noDictionary:
-                scoreNo += calculateCondNo(noDictionary[item])
+            if word in noDictionary:
+                scoreNo += calculateCondNo(noDictionary[word])
             else:
                 scoreNo += calculateCondNo(0)
+
+    #print(scoreYes, scoreNo)
 
     if scoreNo > scoreYes:
         modelPrediction = "no"
@@ -96,7 +100,7 @@ for i in range(len(testTweets)):
         modelPrediction = "yes"
         finalScore = scoreYes
 
-    id, *tweet, classification = testTweets[i].split()
+    id, *tweet, classification = item.split()
 
     if classification == "no" and modelPrediction == "yes":
         conclusion = "wrong"
