@@ -119,7 +119,6 @@ for item in testTweets:
     f.write(id + "  " + str(modelPrediction) + "  " + str("{:e}".format(finalScore)) + "  "
            + classification + "  " +str(conclusion) + "\n")
 
-
 def calculateAccuracy():
     # % of instances of the test set the algorithm correctly
     return numCorrect / (numCorrect + numWrong)
@@ -128,19 +127,19 @@ def calculateAccuracy():
 print("Accuracy : " + str(calculateAccuracy()))
 
 def calculateRecallYes():
-    return numCorrect / (numCorrect + fpNo)
-
-
-def calculateRecallNo():
-    return numCorrect / (numCorrect + fpNo)
-
-
-def calculatePrecisionYes():
     return numCorrect / (numCorrect + fnYes)
 
 
-def calculatePrecisionNo():
+def calculateRecallNo():
     return numCorrect / (numCorrect + fnNo)
+
+
+def calculatePrecisionYes():
+    return numCorrect / (numCorrect + fpYes)
+
+
+def calculatePrecisionNo():
+    return numCorrect / (numCorrect + fpNo)
 
 
 def calculateF1Yes():
